@@ -1,0 +1,111 @@
+% Fisher Memory Matrix and Eigenspectrum
+% Linear Randomnly Connected Homogenous Network with Static Synapses 
+
+%%************************************************************************
+
+function [We,J_x, J_I, Linear_Re] = StaticRandom (Rates,re_o)
+
+% Parameters:
+N = 1000; 
+I = eye(N);
+
+%Connectivity
+meanw = 0; 
+variancew = 4;
+d = 0.10;  
+W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
+We = zeros(N,N) + W/N;
+
+%External Input
+S_t = zeros(N,1);
+S_t(5) = 2;
+So = 10; 
+Input = zeros(N,N) + So;
+Input(:,1) = Input(:,1) + S_t;
+Sigma = zeros(N,N) + randn(N,N);
+V = eye(N); 
+
+%Linearized System
+    
+%Effective Connectivity Matrices
+J_x = -I + We*I; %Jacobian Matrix - derivaties with respect to activity perturbation
+J_I = zeros(N,N);
+J_I(1,:) = diag(V); %Jacobian Matrix - derivaties with respect to input perturbation
+
+%Effective Time-varying Variables
+L = size(Input,2);
+deltax = Rates(:,1) - re_o; %deviations at the time of perturbation
+I_o = zeros(N,N) + So; %Steady state Input
+
+
+%Trajectories of the Linearized System
+dt = 1; %0.0001;
+DeltaX(:,1) = deltax;
+t(1) = 0;
+
+for n = 1:L
+ 
+    
+DeltaI(:,n) = I_o(:,n)-Input(:,n)- Sigma(:,n); %Input deviations from steady state
+
+%Dynamics of the linearized system using jacobians as effective weight
+%connectivity and input connectivity matrices
+    t(n+1) = t(n) + dt;
+    DeltaX(:,n+1) = DeltaX(:,n) + dt*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n));  
+    DeltaX(DeltaX < 0) = 0; 
+    
+     % save network activition
+     Linear_Re= DeltaX; 
+   
+end
+
+figure(1)
+plot(t,Linear_Re)
+
+%Fisher Information
+
+Cov = zeros(N,N); %Initialize covariance matrix
+    
+for k = 1:L
+      J_x_k = (J_x)^k;
+      
+       J_x_K (:,:,k) = J_x_k;
+      
+      Cov = J_x_K(:,:,k)*(J_x_K(:,:,k))';
+      size(Cov)
+      
+      Cov_matrix = Cov + Cov(k);
+      
+end
+
+Covn = inv(Cov_matrix);
+
+for p = 1:L
+    
+    for l = 1:L
+        
+        FMM = J_I'*J_x_K(:,:,p)'*(Covn)*J_x_K(:,:,l) *J_I;
+
+      FMC = diag(FMM);
+      figure(2)
+      plot(FMC)
+    end
+    
+end
+
+    
+ %plot evalues of J 
+     
+    evalues = eig(J_x);    % Get the eigenvalues of effective connectivity matrix
+
+   figure(3) %   Plot real and imaginary parts
+     plot(real(evalues),imag(evalues),'r*') 
+     xlabel('Real')
+     ylabel('Imaginary')
+     
+     figure(4) % Check if eigenspectrum lies whithin the unit circle when normalized
+     plot(evalues/(sqrt(N)*variancew^1/2),'r*') 
+     axis([-1.1 1.1 -1.1 1.1])
+
+
+end
