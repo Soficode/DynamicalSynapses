@@ -3,10 +3,10 @@
 
 %%************************************************************************
 
-function [We,J_x, J_I, Linear_Re] = StaticRandom (Rates,re_o)
+function [We] = StaticRandom (Rates,re_o)
 
 % Parameters:
-N = 1000; 
+N = 100; 
 I = eye(N);
 
 %Connectivity
@@ -25,28 +25,35 @@ Input(:,1) = Input(:,1) + S_t;
 Sigma = zeros(N,N) + randn(N,N);
 V = eye(N); 
 
-%Linearized System
+%Linearized System. Rate equation was linearized around the fixed point Ro.
     
-%Effective Connectivity Matrices
-J_x = -I + We*I; %Jacobian Matrix - derivaties with respect to activity perturbation
+%Effective Connectivity Matrices - jacobian matrices with respect to
+%perturbations and evaluated around the fixed point
+
+J_x = -I + We*I; %derivative with respect to deviations from Ro (effective connectivity matrix)
 J_I = zeros(N,N);
-J_I(1,:) = diag(V); %Jacobian Matrix - derivaties with respect to input perturbation
+J_I(1,:) = diag(V); %derivative with respect to input perturbation (effective input connectivity)
 
 %Effective Time-varying Variables
-L = size(Input,2);
-deltax = Rates(:,1) - re_o; %deviations at the time of perturbation
-I_o = zeros(N,N) + So; %Steady state Input
+L = size(Input,2); %Length of Integration
+deltax = Rates(:,1) - re_o; %deviations from Ro at the time of perturbation
+I_o = zeros(N,N) + So; %Steady state of the Input
 
 
-%Trajectories of the Linearized System
+%Trajectories of the Linearized System - evolution of the deviations of the
+%rate 
 dt = 1; %0.0001;
-DeltaX(:,1) = deltax;
+DeltaX(:,1) = deltax; %Dynamic variable that captures deviations from steady state given a perturbation 
 t(1) = 0;
 
 for n = 1:L
  
     
-DeltaI(:,n) = I_o(:,n)-Input(:,n)- Sigma(:,n); %Input deviations from steady state
+DeltaI(:,n) = I_o(:,n)-Input(:,n)- Sigma(:,n); %Input deviations from steady state - deterministic
+size(DeltaX(:,n))
+size(J_x)
+size(J_I)
+size(DeltaI(:,n))
 
 %Dynamics of the linearized system using jacobians as effective weight
 %connectivity and input connectivity matrices
@@ -62,38 +69,42 @@ end
 figure(1)
 plot(t,Linear_Re)
 
-%Fisher Information
+%Fisher Information - depends on the connectivity matrix, covariance matrix
+%and the input connectivity
 
-Cov = zeros(N,N); %Initialize covariance matrix
+Cov = zeros(N,N); %Initialize covariance matrix : Cov = sum(J^k*J^k'). The sum goes from k = 0 to k = infinity - here we use the end of the input(L)
     
 for k = 1:L
-      J_x_k = (J_x)^k;
+      J_x_k = (J_x)^k; % Calculates J^k for every k 
       
-       J_x_K (:,:,k) = J_x_k;
-      
-      Cov = J_x_K(:,:,k)*(J_x_K(:,:,k))';
-      size(Cov)
+      Cov = J_x_k*(J_x_k)';
       
       Cov_matrix = Cov + Cov(k);
+      
+      J_x_K (:,:,k) = J_x_k; %Stores all values of J_x^k
       
 end
 
 Covn = inv(Cov_matrix);
 
+%Fisher Information Matrix, where J_I'*J_x^k*Covn*J_x^l*J_I is only entry
+%of the matrix at (k,l). To compute the matrix, use the above formula for
+%all time steps (all values of k and l for 1:L)
+
 for p = 1:L
     
     for l = 1:L
         
-        FMM = J_I'*J_x_K(:,:,p)'*(Covn)*J_x_K(:,:,l) *J_I;
-
-      FMC = diag(FMM);
-      figure(2)
-      plot(FMC)
+        FMM = J_I'*J_x_K(:,:,p)'*(Covn)*J_x_K(:,:,l) *J_I; %Fisher Memory Matrix
     end
     
-end
-
+ end
     
+    FMC = diag(FMM); %The diagonal elements of the matrix are the Fisher Memory Curve
+      figure(2)
+      plot(FMC)
+    
+
  %plot evalues of J 
      
     evalues = eig(J_x);    % Get the eigenvalues of effective connectivity matrix

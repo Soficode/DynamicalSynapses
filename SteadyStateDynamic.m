@@ -31,7 +31,8 @@ We = zeros(N,N) + W/N;
 
 %Training
 dt = 1; % 0.001; 
-trainTime = size(Input,1); 
+trainTime = size(Input,1);
+L = trainTime;
 Rates = zeros(N,L);  % complete state history
 size(trainTime)
 t(1) = 0;
@@ -54,7 +55,7 @@ for n = 1:trainTime
    
  % Network activation
   
- h(:,n) = We*Ds*Re(:,n) + V*Input (:,n)/dt + Sigma(:,n);
+ h(:,n) = We*Ds*Re(:,n) + V*Input (:,n) + Sigma(:,n);
  h(:,n) = sigmf(h(:,n),[2 4]);
  
  %Rate Dynamics
