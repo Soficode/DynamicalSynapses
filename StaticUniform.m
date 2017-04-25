@@ -3,7 +3,7 @@
 
 %%************************************************************************
 
-function [We, DeltaX,J_x, J_I] = StaticRandom (Rates,re_o)
+function [We] = StaticUniform (Rates,re_o)
 
 % Parameters:
 N = 100; 
@@ -12,8 +12,8 @@ I = eye(N);
 %Connectivity
 meanw = 0; 
 variancew = 4;
-d = 0.10;  
-W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
+d = 0.10;
+W  = sprand (N,N,d)*(variancew^1/2) + meanw;
 We = zeros(N,N) + W/N;
 
 %External Input
@@ -42,9 +42,9 @@ I_o = zeros(N,N) + So; %Steady state of the Input
 
 %Trajectories of the Linearized System - evolution of the deviations of the
 %rate 
-dt = 0.001;
+dt = 0.0001;
 tau_m = 0.006;
-alpha = dt /tau_m;
+alpha = dt/tau_m;
 DeltaX(:,1) = deltax; %Dynamic variable that captures deviations from steady state given a perturbation 
 t(1) = 0;
 
@@ -60,7 +60,7 @@ size(DeltaI(:,n))
 %Dynamics of the linearized system using jacobians as effective weight
 %connectivity and input connectivity matrices
     t(n+1) = t(n) + dt;
-    DeltaX(:,n+1) = DeltaX(:,n) + alpha*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n)/sqrt(dt));  
+    DeltaX(:,n+1) = DeltaX(:,n) + alpha*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n)*sqrt(dt));  
     DeltaX(DeltaX < 0) = 0; 
     
      % save network activition

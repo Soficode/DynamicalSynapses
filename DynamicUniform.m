@@ -3,11 +3,11 @@
 
 %%************************************************************************
 
-function [J_x,DeltaI] = DynamicRandom(re_o, Rates, UE, XE)
+function [J_x] = DynamicUniform(re_o, Rates, UE, XE)
 
 % Parameters:
-tau_d = 0.200; %ms
-tau_f = 0.150; %ms
+tau_d = 0.2; %ms
+tau_f = 0.15; %ms
 N = 100; % network size;
 U = zeros(1,N) + 0.20;
 U = diag(U);   
@@ -87,9 +87,9 @@ I_o = zeros(N,N) + So;
 
 
 %Trajectories of the Linearized System
-dt = 0.0001;
 tau_m = 0.006;
-alpha = dt /tau_m;
+dt = 0.0001;
+alpha = dt/tau_m;
 DeltaX(:,1) = vertcat(deltax, deltaUE, deltaXE);
 t(1) = 0;
 
@@ -100,11 +100,6 @@ for n = 1:L
    
 DeltaI(:,n) = vertcat (I_o(:,n), SynapticInput, SynapticInput);
 %Input(:,n) - Sigma(:,n) - I_o(:,n);
-
-size(DeltaX(:,n))
-size(J_x)
-size(J_I)
-size(DeltaI(:,n))
 
     t(n+1) = t(n) + dt;
     DeltaX(:,n+1) = DeltaX(:,n) + alpha*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n)*sqrt(dt));  
