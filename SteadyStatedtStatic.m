@@ -9,11 +9,11 @@ Re = 45*rand(N,1); %Initial Rates
 
 %External Input in Hz
 S_t = zeros(N,1);
-S_t(5) = 200; % one current injection at the beginning
+S_t(5) = 2; % one current injection at the beginning
 So = 10; % Constant background Input
 Input = zeros(N,N) + So;
 Input(:,1) = Input(:,1) + S_t; %Input current includes background and transient
-Sigma = zeros(N,N)+ randn(N,N); % External noise
+Sigma = zeros(N,N)+ randn(N,N) + 200; % External noise
 V = eye(N); %Input connectivity 
 
 %Connectivity (Sparse and Random. Weights follow a normal distribution and
@@ -31,7 +31,7 @@ L = trainTime;
 Rates = zeros(N,L);  % Initialize matrix that stores history of the rates
 t(1) = 0; %time variable
 Re(:,1) = Re; %Rates
-s
+
 for n = 1:L
  
    tau_m = 0.060; %membrane time constant

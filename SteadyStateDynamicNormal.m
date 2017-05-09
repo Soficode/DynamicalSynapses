@@ -54,7 +54,7 @@ for n = 1:L
    
  % Network activation
   
- h(:,n) = We*Ds*Re(:,n) + V*Input (:,n) + Sigma(:,n)t;
+ h(:,n) = We*Ds*Re(:,n) + V*Input (:,n) + Sigma(:,n);
  %h(:,n) = sigmf(h(:,n),[2 4]);
 
     t(n+1) = t(n) + dt;
@@ -77,6 +77,18 @@ end
 re_o = Rates(:,L);
 
 plot(t,Re)
+
+   evalues = eig(We*Ds);    % Get the eigenvalues of effective connectivity matrix
+
+   figure(3) %   Plot real and imaginary parts
+     plot(real(evalues),imag(evalues),'r*') 
+     xlabel('Real')
+     ylabel('Imaginary')
+     
+     figure(4) % Check if eigenspectrum lies whithin the unit circle when normalized
+     plot(evalues/(sqrt(N)*variancew^1/2),'r*') 
+     axis([-1.1 1.1 -1.1 1.1])
+   
  
  
 end

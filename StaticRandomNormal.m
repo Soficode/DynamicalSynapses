@@ -3,19 +3,19 @@
 
 %%************************************************************************
 
-function [We, DeltaX,J_x, J_I] = StaticRandom (Rates,re_o)
+function [We, DeltaX,J_x, J_I] = StaticRandomNormal (Rates,re_o)
 
 % Parameters:
 N = 100; 
 I = eye(N);
 
 %Connectivity
+
 meanw = 0; 
 variancew = 4;
-d = 0.10;  
+d = 0.10;
 W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
-We = zeros(N,N) + W/N;
-
+We = W - tril(W,-1) + tril(W,1)';
 %External Input
 S_t = zeros(N,1);
 S_t(5) = 2;

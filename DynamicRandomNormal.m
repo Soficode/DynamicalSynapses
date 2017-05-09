@@ -3,15 +3,16 @@
 
 %%************************************************************************
 
-function [J_x] = DynamicUniform(re_o, Rates, UE, XE)
+function [J_x,DeltaI, DeltaX,t] = DynamicRandomNormal(re_o, Rates, UE, XE)
 
 % Parameters:
-tau_d = 0.2; %ms
+tau_d = 0.200; %ms
 tau_f = 0.15; %ms
 tau_m = 0.006;
 N = 100; % network size;
-U = zeros(1,N) + 0.20;
-   
+U = zeros(N,1) + 0.20;
+
+%U = diag(U);   
 I = eye(N);
 
 %External Input
@@ -29,7 +30,7 @@ meanw = 0;
 variancew = 4;
 d = 0.10;
 W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
-We = zeros(N,N) + W/N;
+We = W - tril(W,-1) + tril(W,1)';
 
 
       
@@ -72,13 +73,11 @@ We = zeros(N,N) + W/N;
     c2 = 1/tau_d*(Dd_o );
 
     c3 = 1/tau_d*(-1/tau_d+diag(U)*(Ds_o));
-      
-     
+  
     
     %Effective Connectivity Matrices
 
     J_x = [ a1 a2 a3; b1 b2 b3; c1 c2 c3];
-    
     
     
 J_I = zeros(3*N,3*N);
@@ -89,13 +88,17 @@ L = size(Input,2);
 deltax = Rates(:,1) - re_o; %deviations at the time of perturbation
 deltaUE = UE(:,1) - ue_o;
 deltaXE = XE(:,1) - xe_o;
+S_t = zeros(N,1);
+S_t(5) = 2;
+So = 10; 
 I_o = zeros(N,N) + So;
+Input = zeros(N,N);
+Input(:,1) = Input(:,1) + S_t;
+Sigma = zeros(N,N) + randn(N,N)+200;
 
 
 %Trajectories of the Linearized System
-tau_m = 0.006;
-dt = 0.0001;
-alpha = dt/tau_m;
+dt = 0.001;
 DeltaX(:,1) = vertcat(deltax, deltaUE, deltaXE);
 t(1) = 0;
 
@@ -103,12 +106,13 @@ for n = 1:L
 
     SynapticInput = zeros(N,1);
     
-   
-DeltaI(:,n) = vertcat (I_o(:,n), SynapticInput, SynapticInput);
-%Input(:,n) - Sigma(:,n) - I_o(:,n);
+Input_delta = I_o(:,n) - Input(:,n) - Sigma(:,n);   
+DeltaI(:,n) = vertcat (Input_delta*sqrt(dt), SynapticInput, SynapticInput);
+
+
 
     t(n+1) = t(n) + dt;
-    DeltaX(:,n+1) = DeltaX(:,n) + alpha*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n)*sqrt(dt));  
+    DeltaX(:,n+1) = DeltaX(:,n) + dt*(J_x*DeltaX(:,n) + J_I*DeltaI(:,n));  
     DeltaX(DeltaX < 0) = 0; 
     
      % save network activition
@@ -117,10 +121,13 @@ DeltaI(:,n) = vertcat (I_o(:,n), SynapticInput, SynapticInput);
 end
 
 figure(1)
-plot(t,Linear_Re)
+plot(t,DeltaX)
+figure(2)
+plot(t,DeltaX(100,:)')
 
-% %Fisher Information
-% 
+
+%Fisher Information
+
 % Cov = zeros(N,N);
 %     
 % for k = 1:L
@@ -146,8 +153,8 @@ plot(t,Linear_Re)
 %       figure(2)
 %       plot(FMC)
 %     end
-%     
-% end
+    
+%end
 
      
     

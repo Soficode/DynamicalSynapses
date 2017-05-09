@@ -55,5 +55,18 @@ end
 re_o = Rates(:,L);
 
 plot(t,Re)
+
+   evalues = eig(We);    % Get the eigenvalues of effective connectivity matrix
+
+   figure(3) %   Plot real and imaginary parts
+     plot(real(evalues),imag(evalues),'r*') 
+     xlabel('Real')
+     ylabel('Imaginary')
+     
+     figure(4) % Check if eigenspectrum lies whithin the unit circle when normalized
+     plot(evalues/(sqrt(N)*variancew^1/2),'r*') 
+     axis([-1.1 1.1 -1.1 1.1])
+   
+
    
 end

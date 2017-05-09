@@ -3,8 +3,8 @@ function [re_o, Rates, UE, XE] = SteadyStateDynamic
 
 % Parameters:
 N = 100; % network size;
-tau_d = 200; %Synaptic depression time constant
-tau_f = 150; %Synaptic facilitation time constant
+tau_d = 0.200; %Synaptic depression time constant
+tau_f = 0.150; %Synaptic facilitation time constant
 U = zeros(1,N) + 0.20; %Maximum faciliation parameter
 U = diag(U);
    
@@ -19,18 +19,18 @@ S_t(5) = 2;
 So = 10; 
 Input = zeros(N,N) + So;
 Input(:,1) = Input(:,1) + S_t;
-Sigma = zeros(N,N) + randn(N,N);
+Sigma = zeros(N,N) + randn(N,N)+200;
 V = eye(N);
 
 %Connectivity
-meanw = -2; 
+meanw = 0; 
 variancew = 4;
 d = 0.10;
 W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
 We = zeros(N,N) + W/N;
 
 %Training
-dt = 1; % 0.001; 
+dt =   0.001; 
 trainTime = size(Input,1);
 L = trainTime;
 Rates = zeros(N,L);  % complete state history
@@ -42,7 +42,7 @@ xe(:,1) = xe;
 
 for n = 1:trainTime
  
-   tau_m = 60;
+   tau_m = 0.060;
    alpha = 1/tau_m; 
     alpha_ue = 1/tau_f; 
      alpha_xe = 1/tau_d;
@@ -56,7 +56,7 @@ for n = 1:trainTime
  % Network activation
   
  h(:,n) = We*Ds*Re(:,n) + V*Input (:,n) + Sigma(:,n);
- %h(:,n) = sigmf(h(:,n),[2 4]);
+% h(:,n) = sigmf(h(:,n),[2 4]);
  
  %Rate Dynamics
 
@@ -84,11 +84,15 @@ end
    
 re_o = Rates(:,L);
 
+figure(1)
 plot(t,Re)
- 
+figure(2)
+plot(t,ue)
+figure(5)
+plot(t,xe)
 
  
-    evalues = eig(We*Ds);    % Get the eigenvalues of J
+    evalues = eig(We*Ds);    % Get the eigenvalues of dynamic connectivity matrix
 
    figure(3)
    plot(real(evalues),imag(evalues),'r*') %   Plot real and imaginary parts
