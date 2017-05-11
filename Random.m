@@ -36,7 +36,6 @@ We = zeros(N,N) + W/N;
 %Training
 dt = 0.001; % Integration step size
 L = size(Input,1); %length of integration = lenght of the input
-Rates = zeros(N,L);  % Initialize matrix that stores history of the rates
 t(1) = 0; %time variable
 Re(:,1) = Re;
 
@@ -49,7 +48,7 @@ for n = 1:L
  % Network activation
 
   h(:,n) = We*Re(:,n) + V*(Input (n)) + Sigma(n); %Input one neuron(External input and recurrent connectivity)
-% h(:,n) = sigmf(h(:,n),[2 4]); %Non linear transfer function 
+ h(:,n) = sigmf(h(:,n),[2 4]); %Non linear transfer function 
   
     t(n+1) = t(n) + dt; %Time variable with step size dt
    Re(:,n+1) = Re(:,n) - dt*(alpha*(Re(:,n)-h(:,n)*sqrt(dt)));  

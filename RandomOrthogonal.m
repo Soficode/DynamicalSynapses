@@ -1,7 +1,7 @@
 %% Random Matrix : Linearized Dynamic Synapses Model
 %%************************************************************************
 
-function [J_x, DeltaX] = RandomDynamic (re_o, Re)
+function [J_x, DeltaX] = RandomOrthogonal (re_o, Re)
 
 % Parameters:
 tau_d = 0.200; %ms
@@ -30,10 +30,9 @@ V(1) = 1;
 
 %Connectivity
 meanw = 0; 
-variancew = 4;
+variancew = 4;%0.999/4*N;
 d = 0.10;
-W  = sprandn (N,N,d)*(variancew^1/2) + meanw;
-We = zeros(N,N) + W/N;
+We  = orth(randn (N,N))*(variancew^1/2) + meanw;
 
 
       
@@ -102,7 +101,6 @@ Input_delta = So(n) - Input(n) - Sigma(n);
 
     t(n+1) = t(n) + dt;
 h = J_x*DeltaX(:,n) + J_I*Input_delta;
- h = sigmf(h,[2 4]); 
    
     DeltaX(:,n+1) = DeltaX(:,n) + dt*(h);  
     DeltaX(DeltaX < 0) = 0; 
