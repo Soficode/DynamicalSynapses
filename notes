@@ -1,0 +1,17 @@
+Dynamical Synapses transform matrices to antisymmetric matrices, which are non normal. (they oscillate - but still driven by main eigenvalue?).
+Now, it is left tocheck whether and in what conditions these non-normal matrices are unitarily equivalent to a delay line: it seems like as long as they are not nomral -- which assymetric arent? -- then they will be 
+
+and talk about FMC why not necessary -- rather focus on input stats
+
+
+Also, test  whether with different input connectivity and statistics you get orthogonal matrices --maybe that would require learning?
+
+first, delay, non- linear, casace, decoder -- or jsut explore different time scales and tm 
+
+extra matrix
+
+write up
+
+no much change with non-linearity
+
+
