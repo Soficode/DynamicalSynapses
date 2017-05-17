@@ -3,7 +3,7 @@
 %Choose V as the maximum principal component of Js
 %%************************************************************************
 
-function [re_o] = Symmetric
+function [re_o, Re] = Symmetric
 
 % Parameters:
 N = 1000; % network size;
@@ -52,7 +52,7 @@ for n = 1:L
  % Network activation
 
   h(:,n) = We*Re(:,n) + V*(Input (n)) + Sigma(n); %Input one neuron(External input and recurrent connectivity)
-% h(:,n) = sigmf(h(:,n),[2 4]); %Non linear transfer function 
+ h(:,n) = sigmf(h(:,n),[2 4]); %Non linear transfer function 
   
     t(n+1) = t(n) + dt; %Time variable with step size dt
    Re(:,n+1) = Re(:,n) - dt*(alpha*(Re(:,n)-h(:,n)*sqrt(dt)));  

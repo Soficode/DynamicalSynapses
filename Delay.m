@@ -3,7 +3,7 @@
 %Choose V as the maximum principal component of Js
 %%************************************************************************
 
-function [re_o] = Delay
+function [re_o, Re] = Delay
 
 % Parameters:
 N = 1000; % network size;
@@ -26,14 +26,19 @@ epsilon = 0.5;
 Sigma = randn(N,1)*epsilon^1/2; % External noise
 V = zeros(N,1); %Input connectivity 
 V(1) = 1;
-
+lambda = zeros(N,1) + 2;
 
 %Connectivity (Sparse and Random. Weights follow a normal distribution and
 %are scaled 1/n)
-meanw = 0; 
-variancew = 4;%0.999/4*N;
-d = 0.10;
-We  = orth(randn (N,N))*(variancew^1/2) + meanw;
+lambda = zeros(N,1) + 2;
+W = zeros(N,N);
+W(1,:) = 0;
+for i = 2:N
+    for j = 1:N
+        W(i,j) = lambda(i)*kroneckerDelta(i,(i-1));
+    end
+end
+
 
 %Training
 dt = 0.001; % Integration step size
